@@ -12,6 +12,9 @@ let inputArray = [
     {"trans_id" : "sktwi1sc2jnrxt57i :: sktwi1sc2jnrxt57k", "user_id" : "sktwi1sc2jnrxt3yf-1", "name": "Walmart", "amount" : 50,"date" : "2018-10-18T21:08:05.405Z"},
     {"trans_id" : "sktwi1sc2jnrxt57i :: sktwi1sc2jnrxt57j", "user_id" : "sktwi1sc2jnrxt3yf-1", "name": "Walmart", "amount" : 50,"date" : "2018-10-25T21:08:05.405Z"}
 ];
+
+
+
 Output:
 let output = [
     {"name" : "Walmart", "user_id" : "sktwi1sc2jnrxt3yf-1", "next_amt" : "2018-11-01T21:08:05.405Z", 
