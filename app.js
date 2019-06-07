@@ -8,6 +8,43 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+// Inputs
+// let my_array = [
+//     {"trans_id" : "sktwi1sc2jnrxt57i :: sktwi1sc2jnrxt57l", "user_id" : "sktwi1sc2jnrxt3yf-1", "name": "Walmart", "amount" : 50,"date" : "2018-10-11T21:08:05.405Z"},
+//     {"trans_id" : "sktwi1sc2jnrxt57i :: sktwi1sc2jnrxt57k", "user_id" : "sktwi1sc2jnrxt3yf-1", "name": "Walmart", "amount" : 50,"date" : "2018-10-18T21:08:05.405Z"},
+//     {"trans_id" : "skti :: sktl", "user_id" : "sktf-1", "name": "Target", "amount" : 100,"date" : "2018-10-10T21:08:05.405Z"},
+//     {"trans_id" : "skti :: sktk", "user_id" : "sktf-1", "name": "Target", "amount" : 100,"date" : "2018-10-20T21:08:05.405Z"},
+//     {"trans_id" : "sktwi1sc2jnrxt57i :: sktwi1sc2jnrxt57j", "user_id" : "sktwi1sc2jnrxt3yf-1", "name": "Walmart", "amount" : 50,"date" : "2018-10-25T21:08:05.405Z"},
+//     {"trans_id" : "skti :: sktj", "user_id" : "sktf-1", "name": "Target", "amount" : 100,"date" : "2018-10-30T21:08:05.405Z"},
+//     {"trans_id" : "sktwi1sc2jnrxt57i :: sktwi1sc2jnrxt57j", "user_id" : "sktwi1sc2jnrxt3yf-1", "name": "Walmart", "amount" : 50,"date" : "2018-11-01T21:08:05.405Z"}
+
+// ];
+// let inArray = [
+//     {
+//       _id: '5cfac941e5a4279a3135fb1d',
+//       trans_id: 'pnz19kugnjwmjmz1z::pnz19kugnjwmjmz22',
+//       user_id: 'pnz19kugnjwmjmw7o-1',
+//       name: 'Netflix',
+//       amount: 13.99,
+//       date: '2019-04-05T20:29:53.013Z'
+//     },
+//     {
+//       _id: '5cfac941e5a4279a3135fb1e',
+//       trans_id: 'pnz19kugnjwmjmz1z::pnz19kugnjwmjmz21',
+//       user_id: 'pnz19kugnjwmjmw7o-1',
+//       name: 'Netflix',
+//       amount: 13.99,
+//       date: '2019-05-05T20:29:53.013Z'
+//     },
+//     {
+//       _id: '5cfac941e5a4279a3135fb1f',
+//       trans_id: 'pnz19kugnjwmjmz1z::pnz19kugnjwmjmz20',
+//       user_id: 'pnz19kugnjwmjmw7o-1',
+//       name: 'Netflix',
+//       amount: 13.99,
+//       date: '2019-06-05T20:29:53.013Z'
+//     }
+//   ];
 
 // Computes difference in dates 
 let date_diff_indays = function(date1, date2) {
@@ -47,34 +84,38 @@ function findSameDateElems(addedDate, inputArray, foundElements) {
             foundElements.push(inputArray[l]);
         }
     }
+    return foundElements;
 }
 // Checks if the element exists in the output array, if not adds the element
 function existElem(elem, diff, check, final, outputArray){
     for(let o = 0; o < outputArray.length; o++){
         if(outputArray[o].name === elem.name){
+            check = true;
             if(!outputArray[o].transactions.includes(elem)){
                 outputArray[o].transactions.push(elem);
                 outputArray[o].next_amt = addDays(elem.date, diff);
-                check = true;
+
             }
         }
     }
     if(check){
-        return;
+        return check;
     }
     if(!final.transactions.includes(elem)){
         final.transactions.push(elem);
     }
+    return check;
 }
 // Checks if the amount is equal and adds the elem
 function amountCheck(compElem, currElem, foundElements, diff, check, final, outputArray){
     for(let m = 0; m < foundElements.length; m++){
         if(currElem.amount === foundElements[m].amount){
-            existElem(compElem, diff, check, final, outputArray);
-            existElem(currElem, diff, check, final, outputArray);
-            existElem(foundElements[m], diff, check, final, outputArray);
+            check = existElem(compElem, diff, check, final, outputArray);
+            check = existElem(currElem, diff, check, final, outputArray);
+            check = existElem(foundElements[m], diff, check, final, outputArray);
         }
     }
+    return check;
 }
 // Assigns values to different parameters of the output array
 function assignValues(diff, final, outputArray){
@@ -83,7 +124,8 @@ function assignValues(diff, final, outputArray){
     final.user_id = last_val.user_id;
     let succ = addDays(last_val.date, diff);
     final.next_amt = succ;
-    outputArray.push(final);  
+    outputArray.push(final); 
+    return outputArray; 
 }
 // Gets recurring transactions from the input array
 function getRecurringTransactions(inputArray){
@@ -101,11 +143,11 @@ function getRecurringTransactions(inputArray){
                 var diff = (date_diff_indays(i_date,j_date));
                 var addedDate = addDays(j_date, diff);
                 addedDate = addedDate.toISOString().substring(0, 10);
-                findSameDateElems(addedDate, inputArray, foundElements);
+                foundElements = findSameDateElems(addedDate, inputArray, foundElements);
                 if(foundElements.length){
-                    amountCheck(inputArray[i],inputArray[j],foundElements,diff, check, final, outputArray);
+                    check = amountCheck(inputArray[i],inputArray[j],foundElements,diff, check, final, outputArray);
                     if(!check){
-                        assignValues(diff, final, outputArray);
+                        outputArray = assignValues(diff, final, outputArray);
                     }
                     foundElements = [];
                 }
@@ -117,12 +159,15 @@ function getRecurringTransactions(inputArray){
     }
     return outputArray;
 }
+// Call to the function
+// getRecurringTransactions(inArray);
 
 //POST API that inserts incoming records into the database and reuturns recurring transactions as response
+
 app.post('/', function (req, res) {
     
-    let inputTransactions = req.body.transactions;
-    // console.log(inputTransactions);
+    let inputTransactions = req.body;
+    
     //insert records from input array to collection
     MongoClient.connect(url, {useNewUrlParser:true}, function(err, db){
         let dbo = db.db("interview_challenge");
@@ -156,4 +201,4 @@ var server = app.listen(1984, function () {
     var host = server.address().address
     var port = server.address().port 
     console.log("Example app listening at http://%s:%s", host, port)
-})
+}) 

@@ -9,7 +9,7 @@ let transactions = [
 ];
 
 //method to test POST request
-/*
+
 axios.post('http://127.0.0.1:1984/', {
     transactions
 })
@@ -19,7 +19,7 @@ axios.post('http://127.0.0.1:1984/', {
 .catch(function (error) {
     console.log(error);
 }); 
-*/
+
 
 
 //method to test GET request
